@@ -1,0 +1,10 @@
+SELECT Name
+From STUDENTS
+WHERE Marks>75
+ORDER BY RIGHT(Name,3), ID ASC;
+
+SELECT user_id,
+CONCAT(UPPER(LEFT(name,1)), LOWER(SUBSTRING(name,2))) AS name
+FROM users
+GROUP BY user_id;
+
