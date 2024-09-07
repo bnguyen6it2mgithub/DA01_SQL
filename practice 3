@@ -8,3 +8,47 @@ CONCAT(UPPER(LEFT(name,1)), LOWER(SUBSTRING(name,2))) AS name
 FROM users
 GROUP BY user_id;
 
+SELECT manufacturer,
+CONCAT('$', ROUND(SUM(total_sales)/1000000),' million') AS total_sale
+FROM pharmacy_sales
+GROUP BY manufacturer
+ORDER BY total_sale DESC, manufacturer ASC;
+
+SELECT EXTRACT(month FROM submit_date) AS month,
+product_id,
+ROUND(AVG(stars),2) AS avg_stars
+FROM reviews
+GROUP BY EXTRACT(month FROM submit_date), product_id
+ORDER BY month, product_id;
+
+SELECT sender_id,
+COUNT(message_id) AS message_count
+FROM messages
+WHERE EXTRACT(MONTH FROM sent_date) =8
+AND EXTRACT(YEAR FROM sent_date) =2022
+GROUP BY sender_id
+ORDER BY message_count DESC
+LIMIT 2;
+
+SELECT tweet_id
+FROM Tweets
+WHERE LENGTH(content)>15
+
+SELECT activity_date AS day,
+COUNT(DISTINCT user_id) AS active_users
+FROM Activity
+WHERE activity_date BETWEEN '2019-06-28' AND '2019-07-27'
+GROUP BY activity_date;
+
+SELECT COUNT(id) AS number_of_hires
+FROM employees
+WHERE 
+joining_date BETWEEN '2022-01-01' AND '2022-07-31';
+
+SELECT POSITION('a' IN first_name) AS positionJ_of_a
+FROM worker
+WHERE first_name='Amitah';
+
+SELECT substring(title, length(winery)+2,4)
+FROM winemag_p2
+WHERE country='Macedonia'
