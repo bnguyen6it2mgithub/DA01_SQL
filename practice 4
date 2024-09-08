@@ -20,3 +20,18 @@ WHEN call_category='n/a' OR call_category IS NULL THEN 1 ELSE 0
 END)*100/COUNT(*),1) AS percentage_nacalls
 FROM callers;
 
+SELECT NAME FROM CUSTOMER
+WHERE REFEREE_ID !=2 OR REFEREE_ID IS NULL;
+
+SELECT
+CASE 
+WHEN passengerid='1' THEN 'first_class'
+WHEN passengerid='2' THEN 'second_class'
+ELSE 'third_class'
+END AS class,
+SUM(CASE WHEN survived!='0' THEN 1 ELSE 0
+END) AS survivors,
+SUM(CASE WHEN survived='0' THEN 1 ELSE 0
+END) AS non_survivors
+FROM titanic
+GROUP BY class
