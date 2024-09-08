@@ -7,3 +7,16 @@ WHEN  device_type IN ('tablet', 'phone') THEN 1 ELSE 0
 END) AS mobile_views
 FROM viewership;
 
+SELECT X,Y,Z,
+CASE 
+WHEN X+Y>Z AND X+Z>Y AND Z+Y>X THEN 'YES'
+ELSE 'NO'
+END AS Triangle
+FROM Triangle;
+
+SELECT
+ROUND(SUM(CASE
+WHEN call_category='n/a' OR call_category IS NULL THEN 1 ELSE 0
+END)*100/COUNT(*),1) AS percentage_nacalls
+FROM callers;
+
