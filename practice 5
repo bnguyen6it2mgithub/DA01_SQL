@@ -13,3 +13,33 @@ FROM emails
 LEFT JOIN texts
  ON emails.email_id = texts.email_id
  AND texts.signup_action = 'Confirmed'
+
+SELECT ROUND(SUM(time_spent) FILTER(WHERE a.activity_type='send')*100/SUM(time_spent),2) as sendperc, 
+ROUND(SUM(time_spent) FILTER(WHERE activity_type='open')*100/SUM(time_spent),2) AS openingperc, 
+b.age_bucket
+FROM activities AS a
+INNER JOIN age_breakdown AS b
+ON a.user_id=b.user_id
+WHERE a.activity_type IN('send','open')
+GROUP BY b.age_bucket
+
+SELECT customer_id
+FROM 
+(SELECT a.customer_id
+FROM customer_contracts AS a
+LEFT JOIN products AS b
+ON a.product_id=b.product_id
+GROUP BY a.customer_id
+HAVING COUNT(DISTINCT b.product_category)=3) as supercloud
+ORDER BY customer_id
+
+
+SELECT a.reports_to AS employee_id,
+b.name,
+COUNT(a.reports_to) AS report_count,
+ROUND(AVG(a.age),0) AS avg_age
+FROM Employees as a
+JOIN Employees as b
+ON a.reports_to=b.employee_id
+GROUP BY employee_id;
+
