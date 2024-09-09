@@ -43,3 +43,18 @@ JOIN Employees as b
 ON a.reports_to=b.employee_id
 GROUP BY employee_id;
 
+SELECT b.product_name, SUM(a.unit) unit
+FROM Orders AS a
+JOIN Products AS b
+ON a.product_id=b.product_id
+WHERE DATE_FORMAT(a.order_date,'%Y'-%m')='2020-02' AND SUM(a.unit)>=100
+ORDER BY b.product_name;
+
+
+SELECT a.page_id
+FROM pages a
+LEFT JOIN page_likes b
+ON a.page_id=b.page_id
+WHERE b.page_id is NULL
+GROUP BY a.page_id
+ORDER BY a.page_id
