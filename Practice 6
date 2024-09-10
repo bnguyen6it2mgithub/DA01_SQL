@@ -39,4 +39,18 @@ WHERE b.page_id is NULL
 GROUP BY a.page_id
 ORDER BY a.page_id
 
-5. 
+5. WITH active_usercte AS 
+  (SELECT 
+    user_id, 
+    SUM(CASE WHEN EXTRACT(YEAR FROM event_date)=2022 AND EXTRACT(MONTH FROM event_date)=6 THEN 1 ELSE 0 END) AS activity_in_june,
+    SUM(CASE WHEN EXTRACT(YEAR FROM event_date)=2022 AND EXTRACT(MONTH FROM event_date)=7 THEN 1 ELSE 0 END) AS activity_in_july
+  FROM user_actions
+  GROUP BY user_id)
+  
+SELECT 
+  7 AS month, 
+  COUNT(user_id) AS monthly_active_users
+FROM cte 
+WHERE activity_in_june>=1 AND activity_in_july>=1;
+
+6.
