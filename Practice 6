@@ -1,4 +1,4 @@
-SELECT COUNT(company_id)
+1. SELECT COUNT(company_id)
 FROM(
 SELECT company_id,
 COUNT(*) AS listing_count
@@ -6,8 +6,7 @@ from job_listings
 GROUP BY company_id
 HAVING COUNT(*)>1) as duplicate_listing_company
 
-.  Method 1
-SELECT product, category, total_spend
+2. SELECT product, category, total_spend
 FROM
 (SELECT product, category,
 SUM(spend) as total_spend,
@@ -20,4 +19,15 @@ GROUP BY product, category) AS ranked_spending
 where ranking<=2
 ORDER BY category, product
 
+3 WITH caller_count_cte AS(
+SELECT policy_holder_id,
+COUNT(case_id) as policy_holder_counts
+FROM callers
+GROUP BY policy_holder_id
+HAVING COUNT(case_id)>=3
+)
 
+SELECT count(policy_holder_counts)
+from caller_count_cte
+
+4. 
