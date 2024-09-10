@@ -31,3 +31,12 @@ SELECT count(policy_holder_counts)
 from caller_count_cte
 
 4. 
+SELECT a.page_id
+FROM pages a
+LEFT JOIN page_likes b
+ON a.page_id=b.page_id
+WHERE b.page_id is NULL
+GROUP BY a.page_id
+ORDER BY a.page_id
+
+5. 
