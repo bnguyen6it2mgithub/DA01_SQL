@@ -1,0 +1,23 @@
+SELECT COUNT(company_id)
+FROM(
+SELECT company_id,
+COUNT(*) AS listing_count
+from job_listings
+GROUP BY company_id
+HAVING COUNT(*)>1) as duplicate_listing_company
+
+.  Method 1
+SELECT product, category, total_spend
+FROM
+(SELECT product, category,
+SUM(spend) as total_spend,
+RANK() OVER(
+PARTITION BY category
+ORDER BY SUM(spend) DESC) AS ranking
+FROM product_spend
+where EXTRACT (YEAR FROM transaction_date)=2022
+GROUP BY product, category) AS ranked_spending
+where ranking<=2
+ORDER BY category, product
+
+
