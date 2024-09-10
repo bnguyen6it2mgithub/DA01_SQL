@@ -54,3 +54,75 @@ FROM cte
 WHERE activity_in_june>=1 AND activity_in_july>=1;
 
 6.
+select month,country, count(*) as trans_count, sum(state = 'approved') as approved_count,
+sum(amount) as trans_total_amount, 
+sum(if(state='approved', amount, 0)) as approved_total_amount
+from (select *,DATE_FORMAT(trans_date, '%Y-%m') as month 
+from transactions) as tab group by country,month;
+
+7.SELECT
+    product_id,
+    year AS first_year,
+    quantity,
+    price
+FROM Sales
+WHERE
+    (product_id, year) IN (
+        SELECT
+            product_id,
+            MIN(year) AS year
+        FROM Sales
+        GROUP BY product_id
+    );
+
+8.SELECT customer_id
+FROM Customer
+GROUP BY 1
+HAVING COUNT(DISTINCT product_key) = (SELECT COUNT(1) FROM Product);
+
+
+9.  SELECT employee_id
+FROM Employees a
+WHERE salary < 30000 
+      AND manager_id IS NOT NULL
+      AND NOT EXISTS (SELECT 1 
+                      FROM Employees b
+                      WHERE b.employee_id = a.manager_id)
+ORDER BY employee_id;
+
+10. select COUNT(company_id)
+FROM (SELECT company_id,
+COUNT(*) as duplicate_count
+FROM job_listings
+GROUP BY company_id) as duplicate_listing
+WHERE duplicate_count>1
+
+11.SELECT user_name AS results FROM
+(
+SELECT a.name AS user_name, COUNT(*) AS counts FROM MovieRating AS b
+    JOIN Users AS a
+    on a.user_id = b.user_id
+    GROUP BY b.user_id
+    ORDER BY counts DESC, user_name ASC LIMIT 1
+) first_query
+UNION
+SELECT movie_name AS results FROM
+(
+SELECT c.title AS movie_name, AVG(d.rating) AS rate FROM MovieRating AS d
+    JOIN Movies AS c
+    on c.movie_id = d.movie_id
+    WHERE substr(d.created_at, 1, 7) = '2020-02'
+    GROUP BY d.movie_id
+    ORDER BY rate DESC, movie_name ASC LIMIT 1
+) second_query;
+
+12.WITH  T AS (
+        SELECT requester_id, accepter_id FROM RequestAccepted
+        UNION ALL
+        SELECT accepter_id, requester_id FROM RequestAccepted
+    )
+SELECT requester_id AS id, COUNT(1) AS num
+FROM T
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 1;
