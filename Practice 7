@@ -1,0 +1,165 @@
+WITH yearly_spend AS (
+    SELECT 
+        product_id,
+        EXTRACT(YEAR FROM transaction_date) AS year,
+        SUM(spend) AS total_spend
+    FROM 
+        user_transactions
+    GROUP BY 
+        product_id, year
+),
+spend_with_lag AS (
+    SELECT 
+        product_id,
+        year,
+        total_spend,
+        LAG(total_spend) OVER (PARTITION BY product_id ORDER BY year) AS prev_year_spend
+    FROM 
+        yearly_spend
+)
+SELECT 
+    year,
+    product_id,
+    total_spend AS curr_year_spend,
+    prev_year_spend,
+    ROUND(((total_spend - prev_year_spend) / prev_year_spend) * 100, 2) AS yoy_growth_percentage
+FROM 
+    spend_with_lag
+ORDER BY 
+    product_id, year;
+
+
+WITH card_launch AS (
+  SELECT 
+    card_name,
+    issued_amount,
+    MAKE_DATE(issue_year, issue_month, 1) AS issue_date,
+    MIN(MAKE_DATE(issue_year, issue_month, 1)) OVER (
+      PARTITION BY card_name) AS launch_date
+  FROM monthly_cards_issued
+)
+
+SELECT 
+  card_name, 
+  issued_amount
+FROM card_launch
+WHERE issue_date = launch_date
+ORDER BY issued_amount DESC;
+
+
+WITH RankedTransactions AS (
+    SELECT 
+        user_id,
+        spend,
+        transaction_date,
+        ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY transaction_date) AS row_num
+    FROM 
+        transactions
+)
+SELECT 
+    user_id,
+    spend,
+    transaction_date
+FROM 
+    RankedTransactions
+WHERE 
+    row_num = 3;
+
+
+
+    WITH RecentTransactions AS (
+    SELECT 
+        user_id,
+        transaction_date,
+        COUNT(product_id) AS num_products,
+        ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY transaction_date DESC) AS row_num
+    FROM 
+        user_transactions
+    GROUP BY 
+        user_id, transaction_date
+)
+SELECT 
+    user_id,
+    transaction_date,
+    num_products
+FROM 
+    RecentTransactions
+WHERE 
+    row_num = 1
+ORDER BY 
+    transaction_date;
+
+    WITH TweetCounts AS (
+    SELECT 
+        user_id,
+        tweet_date,
+        tweet_count,
+        AVG(tweet_count) OVER (
+            PARTITION BY user_id 
+            ORDER BY tweet_date 
+            ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+        ) AS rolling_avg_3d
+    FROM 
+        tweets
+)
+SELECT 
+    user_id,
+    tweet_date,
+    ROUND(rolling_avg_3d, 2) AS rolling_avg_3d
+FROM 
+    TweetCounts
+ORDER BY 
+    user_id, tweet_date;
+
+
+WITH payments AS (
+  SELECT 
+    merchant_id, 
+    EXTRACT(EPOCH FROM transaction_timestamp - 
+      LAG(transaction_timestamp) OVER(
+        PARTITION BY merchant_id, credit_card_id, amount 
+        ORDER BY transaction_timestamp)
+    )/60 AS minute_difference 
+  FROM transactions) 
+
+SELECT COUNT(merchant_id) AS payment_count
+FROM payments 
+WHERE minute_difference <= 10;
+
+
+
+SELECT product, category, total_spend
+FROM
+(SELECT product, category,
+SUM(spend) as total_spend,
+RANK() OVER(
+PARTITION BY category
+ORDER BY SUM(spend) DESC) AS ranking
+FROM product_spend
+where EXTRACT (YEAR FROM transaction_date)=2022
+GROUP BY product, category) AS ranked_spending
+where ranking<=2
+ORDER BY category, product
+
+
+WITH top_appearances AS(
+SELECT artist_id, count(*) as appearance
+FROM global_song_rank INNER JOIN songs USING (song_id)
+WHERE "rank" BETWEEN 1 and 10
+GROUP BY artist_id
+ORDER BY appearance DESC),
+
+top_ranks AS (
+SELECT artist_id, DENSE_RANK()
+OVER(
+  ORDER BY appearance DESC
+) as artist_rank
+FROM top_appearances 
+)
+
+SELECT artist_name, artist_rank
+FROM top_ranks INNER JOIN artists USING (artist_id)
+WHERE artist_rank <= 5
+ORDER BY artist_rank, artist_name;
+
+
